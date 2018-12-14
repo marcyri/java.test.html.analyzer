@@ -1,8 +1,13 @@
+import cz.vutbr.web.css.CSSException;
+import cz.vutbr.web.css.CSSFactory;
+import cz.vutbr.web.css.CombinedSelector;
+import cz.vutbr.web.css.StyleSheet;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -43,6 +48,15 @@ public class AnalyzerPage {
         } else {
             printResult(findElement);
         }
+    }
+
+    private void getElementByCssAttr() {
+        try {
+            StyleSheet styleSheet = CSSFactory.parse(args.getOriginFilePath(), AnalyzerUtils.CHARSET_NAME);
+        }  catch (Exception e) {
+            e.printStackTrace();
+        }
+        
     }
 
     private Element getMaxCountAttrFindElement() {

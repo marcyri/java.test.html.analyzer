@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 public class AnalyzerUtils {
-    private static String CHARSET_NAME = "utf8";
+    public static String CHARSET_NAME = "utf8";
 
     private static Optional<Document> getDoc(File htmlFile) {
         try {
