@@ -92,7 +92,7 @@
                         </li>
                         <li class="divider"></li>
                         <li>
-                            <a class="btn btn-success" href="#">
+                            <a class="text-center" href="#">
                                 <strong>Read All Messages</strong>
                                 <i class="fa fa-angle-right"></i>
                             </a>
@@ -409,33 +409,22 @@
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
-                            <a
-                                class="btn btn-danger"
-                                href="#ok"
-                                title="Make-Button"
-                                onclick="javascript:window.close(); return false;">
-                              Break everyone's OK
-                            </a>
-
-                            <a
-                                class="btn btn-success"
-                                href="#check-and-ok"
-                                title="Make-Button"
-                                rel="done"
-                                onclick="javascript:window.okDone(); return false;">
-                              Make everything OK
-                            </a>
-                            <a
-                                    class="btn btn-success"
-                                    href="#check-and-ok"
-                                    href="#check-and-ok11"
-                                    title="Make-Button"
-                                    rel="done"
-                                    onclick="javascript:window.okDone(); return false;">
-                                Make everything OK
-                            </a>
+                          <button class="btn btn-success" onclick="javascript:location='http://google.com';" style="display:none">
+                            Make everything OK
+                          </button>
                         </div>
                         <!-- /.panel-body -->
+                        <div class="panel-footer">
+                          <a
+                              class="btn btn-success"
+                              href="#ok"
+                              title="Make-Button"
+                              rel="next"
+                              onclick="javascript:window.okFinalize(); return false;">
+                            Do all GREAT
+                          </a>
+                        </div>
+                        <!-- /.panel-footer -->
                     </div>
                 </div>
                 <!-- /.col-lg-8 -->

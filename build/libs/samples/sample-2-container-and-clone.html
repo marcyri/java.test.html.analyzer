@@ -92,7 +92,7 @@
                         </li>
                         <li class="divider"></li>
                         <li>
-                            <a class="btn btn-success" href="#">
+                            <a class="text-center" href="#">
                                 <strong>Read All Messages</strong>
                                 <i class="fa fa-angle-right"></i>
                             </a>
@@ -409,31 +409,16 @@
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
+                          <div class="some-container">
                             <a
-                                class="btn btn-danger"
+                                class="btn test-link-ok"
                                 href="#ok"
                                 title="Make-Button"
-                                onclick="javascript:window.close(); return false;">
-                              Break everyone's OK
-                            </a>
-
-                            <a
-                                class="btn btn-success"
-                                href="#check-and-ok"
-                                title="Make-Button"
-                                rel="done"
-                                onclick="javascript:window.okDone(); return false;">
+                                rel="next"
+                                onclick="javascript:window.okComplete(); return false;">
                               Make everything OK
                             </a>
-                            <a
-                                    class="btn btn-success"
-                                    href="#check-and-ok"
-                                    href="#check-and-ok11"
-                                    title="Make-Button"
-                                    rel="done"
-                                    onclick="javascript:window.okDone(); return false;">
-                                Make everything OK
-                            </a>
+                          </div>
                         </div>
                         <!-- /.panel-body -->
                     </div>
@@ -495,6 +480,9 @@
                             </div>
                             <!-- /.list-group -->
                             <a href="#" class="btn btn-default btn-block">View All Alerts</a>
+                            <a href="#incorrect-link" class="btn btn-info" style="display:none" title="Make-Button" onclick="javascript:window.close(); return false;">
+                              Make everything OK
+                            </a>
                         </div>
                         <!-- /.panel-body -->
                     </div>

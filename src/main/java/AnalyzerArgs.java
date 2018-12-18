@@ -1,14 +1,9 @@
-public class AnalyzerArgs {
+class AnalyzerArgs {
     private String origin_file_path = "./samples/sample-0-origin.html";
-//    private String origin_file_path = "./samples/startbootstrap-freelancer-gh-pages-cut.html";
-//    private String other_sample_file_path = "./samples/startbootstrap-freelancer-gh-pages-cut.html";
     private String other_sample_file_path = "./samples/sample-1-evil-gemini.html";
-//    private String other_sample_file_path = "./samples/sample-2-container-and-clone.html";
-//    private String other_sample_file_path = "./samples/sample-4-the-mash.html";
-//    private String other_sample_file_path = "./samples/sample-3-the-escape.html";
     private String origin_element_id = "make-everything-ok-button";
 
-    public AnalyzerArgs(String[] args) {
+    AnalyzerArgs(String[] args) {
         if (args.length == 3) {
             this.origin_element_id = args[2];
         }
@@ -18,15 +13,15 @@ public class AnalyzerArgs {
         }
     }
 
-    public String getOriginFilePath() {
+    String getOriginFilePath() {
         return origin_file_path;
     }
 
-    public String getOtherSampleFilePath() {
+    String getOtherSampleFilePath() {
         return other_sample_file_path;
     }
 
-    public String getOriginElementId() {
+    String getOriginElementId() {
         return origin_element_id;
     }
 }

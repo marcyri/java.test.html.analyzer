@@ -1,32 +1,36 @@
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class AnalyzerPage {
+class AnalyzerPage {
     private AnalyzerArgs args;
     private Element originButton;
     private Elements preFindElements;
 
-    public AnalyzerPage(AnalyzerArgs args) {
+    private static Logger LOGGER = LoggerFactory.getLogger(AnalyzerPage.class);
+
+    AnalyzerPage(AnalyzerArgs args) {
         this.args = args;
     }
 
-    public void fireAnalyze() {
+    void fireAnalyze() {
         originButton = getOriginButton();
         if (originButton == null) {
-            System.out.println("Original button is not present :(");
+            LOGGER.warn("Original button is not present :(");
             return;
         }
 
         // get preFind elements
         preFindElements = getPreFindElements(getCssQueryForSearch());
         if (preFindElements == null || preFindElements.size() < 1) {
-            System.out.println("Not found :(");
+            LOGGER.warn("Not found :(");
             return;
         }
 
@@ -37,23 +41,36 @@ public class AnalyzerPage {
         }
 
         // if elements > 1 - check count of equals attribute
-        Element findElement = getMaxCountAttrFindElement();
+        List<Element> findElement = getMaxCountAttrFindElement();
         if (findElement == null) {
-            System.out.println("Not found :(");
+            LOGGER.warn("Not found :(");
         } else {
             printResult(findElement);
         }
     }
 
-    private Element getMaxCountAttrFindElement() {
+    private List<Element> getMaxCountAttrFindElement() {
         // fill count of equals attr
         Map<Element, Integer> preFindElementsWithAttrCount = new HashMap<>();
         for (Element el : preFindElements) {
             int countEqualAttr = 0;
-            for (Attribute attrFind : el.attributes()) {
-                for (Attribute attrOrigi : originButton.attributes()) {
-                    if (attrOrigi.equals(attrFind)) {
+            for (Attribute attrOrigi : originButton.attributes()) {
+                boolean isAdd = false;
+                for (Iterator<Attribute> iter = el.attributes().iterator(); iter.hasNext() && !isAdd; ) {
+                    Attribute attrFind = iter.next();
+                    String attrOrigiStr = attrOrigi.toString().toLowerCase();
+                    String attrFindStr = attrFind.toString().toLowerCase();
+                    if (attrOrigiStr.equals(attrFindStr)) {
                         countEqualAttr++;
+                        isAdd = true;
+                    } else {
+                        if (attrOrigi.getKey().toLowerCase().equals("class") && attrFind.getKey().toLowerCase().equals("class")) {
+                            String[] splitedCssClass = attrOrigiStr.split(" ");
+                            if (Stream.of(splitedCssClass).allMatch(attrFindStr::contains)) {
+                                countEqualAttr++;
+                                isAdd = true;
+                            }
+                        }
                     }
                 }
             }
@@ -61,54 +78,39 @@ public class AnalyzerPage {
         }
 
         // filter element by max count attr equals
-        Optional<Map.Entry<Element, Integer>> elWithMaxAttrCount = preFindElementsWithAttrCount.entrySet().stream().max(Map.Entry.comparingByValue());
-        List<Element> filterElementsByMaxCount = null;
+        Optional<Map.Entry<Element, Integer>> elWithMaxAttrCount = preFindElementsWithAttrCount.entrySet().stream().filter(e -> e.getValue() > 0).max(Map.Entry.comparingByValue());
+        List<Element> filterElementsByMaxCount;
         if (elWithMaxAttrCount.isPresent()) {
             filterElementsByMaxCount = preFindElementsWithAttrCount.entrySet().stream()
-                    .filter(e -> e.getValue() == elWithMaxAttrCount.get().getValue())
+                    .filter(e -> Objects.equals(e.getValue(), elWithMaxAttrCount.get().getValue()))
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
+        } else {
+            LOGGER.info("There is no equals attribute");
+            return null;
         }
 
         // if element was found
-        if (filterElementsByMaxCount.size() == 1) {
-            return filterElementsByMaxCount.get(0);
-        }
-
-        // if find elements by max count attr equals > 1 => check the parents
-        Map<Element, Integer> equalParentsCountPerElements = new HashMap<>();
-        for (Element filterElement : filterElementsByMaxCount) {
-            int countEqualParents = 0;
-            for (Element filterElementParent : filterElement.parents()) {
-                //path.insert(0, filterElementParent.tagName() + " > ");
-                for (Element originalElementParent : originButton.parents()) {
-                    if (originalElementParent.attributes().equals(filterElementParent.attributes())) {
-                        countEqualParents++;
-                    }
-                }
+        try {
+            if (filterElementsByMaxCount.size() == 1) {
+                return filterElementsByMaxCount;
             }
-            equalParentsCountPerElements.put(filterElement, countEqualParents);
-        }
-        Optional<Map.Entry<Element, Integer>> elWithMaxParentsCount =
-                equalParentsCountPerElements.entrySet().stream().max(Map.Entry.comparingByValue());
-
-        List<Element> filterElementsByParentsCount = null;
-        if (elWithMaxParentsCount.isPresent()) {
-            filterElementsByParentsCount = preFindElementsWithAttrCount.entrySet().stream()
-                    .filter(e -> e.getValue() == elWithMaxParentsCount.get().getValue())
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
+        } catch (Exception e) { // if something went wrong
+            LOGGER.error("Something went wrong. Doesn't find elements with max equal count attr in stream :/ [{}]", e.getMessage());
+            return null;
         }
 
-        // if element was found
-        if (filterElementsByParentsCount.size() == 1) {
-            return filterElementsByParentsCount.get(0);
-        }
+        // TODO: add css styles analyzer
+        LOGGER.info("Elements with max count attr equals > 1. => need add check css attributes (like a color)");
 
-        return null;
+        return filterElementsByMaxCount;
     }
 
-
+    private void printResult(List<Element> target) {
+        for (Element el: target) {
+            printResult(el);
+        }
+    }
     private void printResult(Element target) {
         List<String> ss = getPathResult(target);
 
@@ -138,9 +140,18 @@ public class AnalyzerPage {
         StringBuilder findCssQuery = new StringBuilder();
         String findsTag = originButton.tag().getName();
         for (Attribute attr : originButton.attributes()) {
-            findCssQuery.append(findsTag)
-                    .append("[").append(attr.getKey())
-                    .append("='").append(attr.getValue()).append("'],");
+            if (attr.getKey().equals("class")) {
+                String[] splitedCssClass = attr.getValue().split(" ");
+                for (String cssClass: splitedCssClass) {
+                    findCssQuery.append(findsTag)
+                            .append("[").append(attr.getKey())
+                            .append("*='").append(cssClass).append("'],");
+                }
+            } else {
+                findCssQuery.append(findsTag)
+                        .append("[").append(attr.getKey())
+                        .append("*='").append(attr.getValue()).append("'],");
+            }
         }
         findCssQuery.delete(findCssQuery.length()-1,findCssQuery.length());
         return findCssQuery;
